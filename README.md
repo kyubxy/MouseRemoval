@@ -20,4 +20,10 @@ python3 MouseRemoval.py
 You can change the keybinds and available speeds by editing the config file in the project root. Make sure this file is in the same folder as the python file.
 Most of it is pretty straightforward, you can also use `#` to start a comment
 
-MouseRemoval uses vim style keybinds for movement, to use the arrow keys, copy [this config](https://github.com/peipacut/MouseRemoval/wiki/Arrow-key-movement)
+MouseRemoval uses vim style keybinds for movement, to use the arrow keys add this to your config
+```
+left : left
+right : right
+up : up
+down : down 
+```
