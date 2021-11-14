@@ -5,10 +5,10 @@ right_click : r
 middle_click : t
 enable_scroll: w
 disable_scroll: q
-left : h 
-right : l 
-up : k 
-down : j 
+left : h
+right : l
+up : k
+down : j
 slower : a 
 slow : s 
 normal : d 
