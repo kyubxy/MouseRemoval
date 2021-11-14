@@ -1,0 +1,20 @@
+# Default configuration, have fun!!
+
+left_click : e 
+right_click : r 
+left : h 
+right : l 
+up : k 
+down : j 
+slower : a 
+slow : s 
+normal : d 
+fast : f 
+reset : esc 
+speed_slower : 1 
+speed_slow : 5 
+speed_normal : 10 
+speed_fast : 20 
+enable : home 
+disable : end 
+force_quit : q 
