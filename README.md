@@ -33,7 +33,6 @@ down : down
 ```
 
 ### Missing features
-- Scrolling
 - Custom speed management
 - Key suppression on non windows operating systems (a linux fix is currently being worked on)
 
