@@ -27,3 +27,6 @@ right : right
 up : up
 down : down 
 ```
+
+### Limitations
+Due to limitations in the keyboard module that we're using, key suppression will only work on windows, a linux fix is currently being worked on.
