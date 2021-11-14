@@ -18,7 +18,7 @@ python3 MouseRemoval.py
 
 Sometimes just double clicking the python file works too. 
 
-Mouse removal also comes with an emergency exit key, pressing <key>ctrl+q</key> should terminate the program in all modes
+Pressing <kbd>alt</kbd>+<kbd>f4</kbd> should terminate the program (it very rarely fails!)
 
 ### Configuration
 You can change the keybinds and available speeds by editing the config file in the project root. Make sure this file is in the same folder as the python file.
