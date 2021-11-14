@@ -1,4 +1,5 @@
 from time import sleep
+from threading import Thread
 import keyboard
 import mouse
 import platform
@@ -26,7 +27,6 @@ DEFAULT_BINDS = {
     "speed_fast" : 20,
     "enable" : "home",
     "disable" : "end",
-    "force_quit" : "ctrl+q",
 }
 
 class App:
@@ -34,7 +34,18 @@ class App:
         print ("running")
         print (f"({platform.system()})")
 
-        # config
+        self.readConfig()
+        self.setState(True)
+
+        # movement
+        self.xdir = 0
+        self.ydir = 0
+        self.speed = 10
+        self.scrolling = False
+
+        self.enabled = True
+
+    def readConfig(self):
         if (os.path.exists (CONFIG)):
             print ("detected config")
             lines = []
@@ -64,61 +75,53 @@ class App:
             print ("no config found, just using the defaults")
             self.binds = DEFAULT_BINDS
 
-        self.setMode(True)
+    def setBinds(self):
+        keyboard.on_press_key(self.getBind("left_click"), lambda _: mouse.press(mouse.LEFT), True)
+        keyboard.on_release_key(self.getBind("left_click"), lambda _: mouse.release(mouse.LEFT), True)
 
-        # movement
-        self.xdir = 0
-        self.ydir = 0
-        self.speed = 10
+        keyboard.on_press_key(self.getBind("right_click"), lambda _: mouse.press(mouse.RIGHT), True)
+        keyboard.on_release_key(self.getBind("right_click"), lambda _: mouse.release(mouse.RIGHT), True)
 
-        # scrolling
-        self.scrolling = False
+        keyboard.on_press_key(self.getBind("middle_click"), lambda _: mouse.press(mouse.MIDDLE), True)
+        keyboard.on_release_key(self.getBind("middle_click"), lambda _: mouse.release(mouse.MIDDLE), True)
+
+        keyboard.on_press_key(self.getBind("slower"), lambda _: self.setSpeed(self.getBind("speed_slower")), True)
+        keyboard.on_press_key(self.getBind("slow"), lambda _: self.setSpeed(self.getBind("speed_slow")), True)
+        keyboard.on_press_key(self.getBind("normal"), lambda _: self.setSpeed(self.getBind("speed_normal")), True)
+        keyboard.on_press_key(self.getBind("fast"), lambda _: self.setSpeed(self.getBind("speed_fast")), True)
+
+        keyboard.add_hotkey(self.getBind("reset"), lambda: self.reset(), suppress=True)
+
+        keyboard.on_press_key(self.getBind("left"), lambda _: self.setXDir(-1), True)
+        keyboard.on_release_key(self.getBind("left"), lambda _: self.setXDir(0), True)
+
+        keyboard.on_press_key(self.getBind("right"), lambda _: self.setXDir(1), True)
+        keyboard.on_release_key(self.getBind("right"), lambda _: self.setXDir(0), True)
+
+        keyboard.on_press_key(self.getBind("down"), lambda _: self.setYDir(1), True)
+        keyboard.on_release_key(self.getBind("down"), lambda _: self.setYDir(0), True)
+
+        keyboard.on_press_key(self.getBind("up"), lambda _: self.setYDir(-1), True)
+        keyboard.on_release_key(self.getBind("up"), lambda _: self.setYDir(0), True)
+
+        keyboard.on_press_key(self.getBind("enable_scroll"), lambda _: self.setScroll(True), True)
+        keyboard.on_press_key(self.getBind("disable_scroll"), lambda _: self.setScroll(False), True)
+
+        keyboard.add_hotkey(self.getBind("disable"), lambda: self.setState(False), suppress=True)
+
+    def setState(self, value):
+        self.enabled = value
+
+        if self.enabled:
+            self.setBinds()
+        else:
+            keyboard.unhook_all();
+            keyboard.add_hotkey(self.getBind("enable"), lambda: self.setState(True), suppress=True)
+
+        print ("--ENABLED--" if self.enabled else "--DISABLED--")
 
     def getBind (self, key):
         return self.binds[key] if key in self.binds else DEFAULT_BINDS[key]
-
-    def setMode (self, enabled):
-        self.enabled = enabled
-
-        if self.enabled:
-            keyboard.on_press_key(self.getBind("left_click"), lambda _: mouse.press(mouse.LEFT), True)
-            keyboard.on_release_key(self.getBind("left_click"), lambda _: mouse.release(mouse.LEFT), True)
-
-            keyboard.on_press_key(self.getBind("right_click"), lambda _: mouse.press(mouse.RIGHT), True)
-            keyboard.on_release_key(self.getBind("right_click"), lambda _: mouse.release(mouse.RIGHT), True)
-
-            keyboard.on_press_key(self.getBind("middle_click"), lambda _: mouse.press(mouse.MIDDLE), True)
-            keyboard.on_release_key(self.getBind("middle_click"), lambda _: mouse.release(mouse.MIDDLE), True)
-
-            keyboard.on_press_key(self.getBind("slower"), lambda _: self.setSpeed(self.getBind("speed_slower")), suppress=True)
-            keyboard.on_press_key(self.getBind("slow"), lambda _: self.setSpeed(self.getBind("speed_slow")), suppress=True)
-            keyboard.on_press_key(self.getBind("normal"), lambda _: self.setSpeed(self.getBind("speed_normal")), suppress=True)
-            keyboard.on_press_key(self.getBind("fast"), lambda _: self.setSpeed(self.getBind("speed_fast")), suppress=True)
-
-            keyboard.add_hotkey(self.getBind("reset"), lambda: self.onEsc(), suppress=True)
-
-            keyboard.on_press_key(self.getBind("left"), lambda _: self.setXDir(-1), True)
-            keyboard.on_release_key(self.getBind("left"), lambda _: self.setXDir(0), True)
-
-            keyboard.on_press_key(self.getBind("right"), lambda _: self.setXDir(1), True)
-            keyboard.on_release_key(self.getBind("right"), lambda _: self.setXDir(0), True)
-
-            keyboard.on_press_key(self.getBind("down"), lambda _: self.setYDir(1), True)
-            keyboard.on_release_key(self.getBind("down"), lambda _: self.setYDir(0), True)
-
-            keyboard.on_press_key(self.getBind("up"), lambda _: self.setYDir(-1), True)
-            keyboard.on_release_key(self.getBind("up"), lambda _: self.setYDir(0), True)
-
-            keyboard.on_press_key(self.getBind("enable_scroll"), lambda _: self.setScroll(True), True)
-            keyboard.on_press_key(self.getBind("disable_scroll"), lambda _: self.setScroll(False), True)
-
-            keyboard.add_hotkey(self.getBind("disable"), lambda: self.setMode(False), suppress=True)
-            print ("--ENABLED--")
-        else:
-            keyboard.unhook_all();
-            keyboard.add_hotkey(self.getBind("enable"), lambda: self.setMode(True), suppress=True)
-            print ("--DISABLED--")
-
 
     def setScroll (self, value):
         self.scrolling = value
@@ -127,33 +130,25 @@ class App:
         self.speed = int(value);
 
     def setXDir(self, value):
-        self.xdir = value
+        if self.enabled:
+            self.xdir = value
 
     def setYDir(self, value):
-        self.ydir = value
+        if self.enabled:
+            self.ydir = value
 
-    def onEsc(self):
-        if not self.enabled:
-            return
-
+    def reset(self):
         self.speed = 10
         self.scrolling = False
 
     def run(self):
         while True:
-            if (not self.enabled):
-                continue
-
-            # movement
-            if (self.scrolling):
+            if self.scrolling:
                 mouse.wheel (-self.ydir)
             else:
                 mouse.move (self.speed*self.xdir, self.speed*self.ydir, False)
 
-            if (keyboard.is_pressed(self.getBind("force_quit"))):
-                break
-
-            sleep (0.01)
+            sleep(0.01)
 
 app = App()
 app.run()

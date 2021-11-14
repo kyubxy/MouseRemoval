@@ -20,4 +20,3 @@ speed_normal : 10
 speed_fast : 20 
 enable : home 
 disable : end 
-force_quit : ctrl+q 
