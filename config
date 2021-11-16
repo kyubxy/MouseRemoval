@@ -18,5 +18,5 @@ speed_slower : 1
 speed_slow : 5 
 speed_normal : 10 
 speed_fast : 20 
-enable : home 
-disable : end 
+enable : caps lock
+disable : caps lock

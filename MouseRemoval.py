@@ -107,13 +107,14 @@ class App:
         keyboard.on_press_key(self.getBind("enable_scroll"), lambda _: self.setScroll(True), True)
         keyboard.on_press_key(self.getBind("disable_scroll"), lambda _: self.setScroll(False), True)
 
-        keyboard.add_hotkey(self.getBind("disable"), lambda: self.setState(False), suppress=True)
 
     def setState(self, value):
         self.enabled = value
 
         if self.enabled:
+            keyboard.unhook_all()
             self.setBinds()
+            keyboard.add_hotkey(self.getBind("disable"), lambda: self.setState(False), suppress=True)
         else:
             keyboard.unhook_all();
             keyboard.add_hotkey(self.getBind("enable"), lambda: self.setState(True), suppress=True)
