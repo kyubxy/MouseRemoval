@@ -107,7 +107,6 @@ class App:
         keyboard.on_press_key(self.getBind("enable_scroll"), lambda _: self.setScroll(True), True)
         keyboard.on_press_key(self.getBind("disable_scroll"), lambda _: self.setScroll(False), True)
 
-
     def setState(self, value):
         self.enabled = value
 
@@ -141,6 +140,7 @@ class App:
     def reset(self):
         self.speed = 10
         self.scrolling = False
+        self.setState(False)
 
     def run(self):
         while True:
