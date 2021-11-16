@@ -4,7 +4,7 @@
 
 ## Dependencies
 Ensure you have the following to run MouseRemoval
-- Python (duh)
+- Python 
 - [Keyboard](https://pypi.org/project/keyboard/)
 - [Mouse](https://pypi.org/project/mouse/)
 
