@@ -1,5 +1,4 @@
 from time import sleep
-from threading import Thread
 import keyboard
 import mouse
 import platform
@@ -31,8 +30,9 @@ DEFAULT_BINDS = {
 
 class App:
     def __init__(self):
-        print ("running")
-        print (f"({platform.system()})")
+        print ("MouseRemoval")
+        print (f"running on ({platform.system()})")
+        print ("peipacut 2021")
 
         self.readConfig()
         self.setState(True)
