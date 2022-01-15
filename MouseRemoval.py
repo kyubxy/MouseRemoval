@@ -1,8 +1,9 @@
 from time import sleep
-import keyboard
-import mouse
+from pynput import keyboard
+from pynput.mouse import Controller, Button
 import platform
-import os.path
+
+mouse = Controller()
 
 CONFIG = "config";
 DEFAULT_BINDS = {
@@ -19,23 +20,26 @@ DEFAULT_BINDS = {
     "slow" : "s",
     "normal" : "d",
     "fast" : "f",
-    "reset" : "esc",
+    "fastest" : "g",
+    "reset" : keyboard.Key.esc,
     "speed_slower" : 1,
     "speed_slow" : 5,
     "speed_normal" : 10,
     "speed_fast" : 20,
-    "enable" : "home",
-    "disable" : "end",
+    "speed_fastest" : 40, # not for the faint of heart
+    "enable" : keyboard.Key.caps_lock,
+    "disable" : keyboard.Key.caps_lock,
+    "kill" : "b"
 }
 
 class App:
     def __init__(self):
-        print ("MouseRemoval")
+        print ("MouseRemoval, pynput branch")
         print (f"running on ({platform.system()})")
         print ("peipacut 2021")
-
-        self.readConfig()
-        self.setState(True)
+        print()
+        e = self.getBind("enable")
+        print(f"press {e} to get started")
 
         # movement
         self.xdir = 0
@@ -43,85 +47,56 @@ class App:
         self.speed = 10
         self.scrolling = False
 
-        self.enabled = True
+        self.keypress = []
+        self.keyrelease = []
 
-    def readConfig(self):
-        if (os.path.exists (CONFIG)):
-            print ("detected config")
-            lines = []
-            # read file
-            with open(CONFIG) as f:
-                lines = f.readlines()
-            
-            self.binds = {}
+        self.setBinds()
+        self.setEnabled(True)
+        self.setEnabled(False)
 
-            for line in lines:
-                tokens = line.split (":")
-                if (len(tokens) < 2):
-                    continue
+        self.toggle_listener = keyboard.Listener(on_press=self.toggle_press,suppress=False)
+        self.toggle_listener.start()
 
-                key = tokens[0].strip()
-                value = tokens[1].split("#")[0].strip()
+    def toggle_press (self, key):
+        if key == self.getBind("enable") and not self.enabled:
+            self.setEnabled(True)
+        elif key == self.getBind ("disable") and self.enabled:
+            self.setEnabled(False)
 
-                # invalid key
-                if not key in DEFAULT_BINDS.keys():
-                    print (f"no such {key} recognised, ommiting this from load")
-                    continue
+    def on_press(self, key):
+        if not self.enabled:
+            if key == self.getBind("enable"):
+                self.setEnabled(True)
+            return
 
-                self.binds[key] = value
+        self.handleKey(key, self.keypress)
 
-            print (self.binds)
-        else:
-            print ("no config found, just using the defaults")
-            self.binds = DEFAULT_BINDS
+    def on_release(self, key):
+        if not self.enabled:
+            return
 
-    def setBinds(self):
-        keyboard.on_press_key(self.getBind("left_click"), lambda _: mouse.press(mouse.LEFT), True)
-        keyboard.on_release_key(self.getBind("left_click"), lambda _: mouse.release(mouse.LEFT), True)
+        self.handleKey(key, self.keyrelease)
 
-        keyboard.on_press_key(self.getBind("right_click"), lambda _: mouse.press(mouse.RIGHT), True)
-        keyboard.on_release_key(self.getBind("right_click"), lambda _: mouse.release(mouse.RIGHT), True)
+    def handleKey (self, key, collection):
+        for (bind, action) in collection:
+            try:
+                if key.char == bind:
+                    action()
+            except (AttributeError):
+                if key == bind:
+                    action()
 
-        keyboard.on_press_key(self.getBind("middle_click"), lambda _: mouse.press(mouse.MIDDLE), True)
-        keyboard.on_release_key(self.getBind("middle_click"), lambda _: mouse.release(mouse.MIDDLE), True)
-
-        keyboard.on_press_key(self.getBind("slower"), lambda _: self.setSpeed(self.getBind("speed_slower")), True)
-        keyboard.on_press_key(self.getBind("slow"), lambda _: self.setSpeed(self.getBind("speed_slow")), True)
-        keyboard.on_press_key(self.getBind("normal"), lambda _: self.setSpeed(self.getBind("speed_normal")), True)
-        keyboard.on_press_key(self.getBind("fast"), lambda _: self.setSpeed(self.getBind("speed_fast")), True)
-
-        keyboard.add_hotkey(self.getBind("reset"), lambda: self.reset(), suppress=True)
-
-        keyboard.on_press_key(self.getBind("left"), lambda _: self.setXDir(-1), True)
-        keyboard.on_release_key(self.getBind("left"), lambda _: self.setXDir(0), True)
-
-        keyboard.on_press_key(self.getBind("right"), lambda _: self.setXDir(1), True)
-        keyboard.on_release_key(self.getBind("right"), lambda _: self.setXDir(0), True)
-
-        keyboard.on_press_key(self.getBind("down"), lambda _: self.setYDir(1), True)
-        keyboard.on_release_key(self.getBind("down"), lambda _: self.setYDir(0), True)
-
-        keyboard.on_press_key(self.getBind("up"), lambda _: self.setYDir(-1), True)
-        keyboard.on_release_key(self.getBind("up"), lambda _: self.setYDir(0), True)
-
-        keyboard.on_press_key(self.getBind("enable_scroll"), lambda _: self.setScroll(True), True)
-        keyboard.on_press_key(self.getBind("disable_scroll"), lambda _: self.setScroll(False), True)
-
-    def setState(self, value):
+    def setEnabled(self, value):
         self.enabled = value
 
         if self.enabled:
-            keyboard.unhook_all()
-            self.setBinds()
-            keyboard.add_hotkey(self.getBind("disable"), lambda: self.setState(False), suppress=True)
+            self.listener = keyboard.Listener(on_press=self.on_press,on_release=self.on_release,suppress=True)
+            self.listener.start()
         else:
-            keyboard.unhook_all();
-            keyboard.add_hotkey(self.getBind("enable"), lambda: self.setState(True), suppress=True)
-
-        print ("--ENABLED--" if self.enabled else "--DISABLED--")
+            self.listener.stop()
 
     def getBind (self, key):
-        return self.binds[key] if key in self.binds else DEFAULT_BINDS[key]
+        return DEFAULT_BINDS[key]
 
     def setScroll (self, value):
         self.scrolling = value
@@ -138,18 +113,60 @@ class App:
             self.ydir = value
 
     def reset(self):
-        self.speed = 10
+        self.speed = self.getBind("speed_normal")
         self.scrolling = False
-        self.setState(False)
 
     def run(self):
-        while True:
+        self.running = True
+
+        while self.running:
+            dx, dy = self.speed * self.xdir, self.speed * self.ydir
+
             if self.scrolling:
-                mouse.wheel (-self.ydir)
+                mouse.scroll(self.xdir, -self.ydir)
             else:
-                mouse.move (self.speed*self.xdir, self.speed*self.ydir, False)
+                mouse.move (dx, dy)
 
             sleep(0.01)
+
+    def kill(self):
+        self.running = False
+        exit(0)
+
+    def setBinds(self):
+        self.keypress.append ((self.getBind("left_click"), lambda : mouse.press(Button.left)))
+        self.keyrelease.append ((self.getBind("left_click"), lambda : mouse.release(Button.left)))
+
+        self.keypress.append ((self.getBind("right_click"), lambda : mouse.press(Button.right)))
+        self.keyrelease.append ((self.getBind("right_click"), lambda : mouse.press(Button.right)))
+
+        self.keypress.append ((self.getBind("middle_click"), lambda : mouse.press(Button.middle)))
+        self.keyrelease.append ((self.getBind("middle_click"), lambda : mouse.press(Button.middle)))
+
+        self.keypress.append ((self.getBind("enable_scroll"), lambda : self.setScroll(True)))
+        self.keyrelease.append ((self.getBind("disable_scroll"), lambda : self.setScroll(False)))
+
+        self.keypress.append ((self.getBind("left"), lambda : self.setXDir(-1)))
+        self.keyrelease.append ((self.getBind("left"), lambda : self.setXDir(0)))
+
+        self.keypress.append ((self.getBind("right"), lambda : self.setXDir(1)))
+        self.keyrelease.append ((self.getBind("right"), lambda : self.setXDir(0)))
+
+        self.keypress.append ((self.getBind("down"), lambda : self.setYDir(1)))
+        self.keyrelease.append ((self.getBind("down"), lambda : self.setYDir(0)))
+
+        self.keypress.append ((self.getBind("up"), lambda : self.setYDir(-1)))
+        self.keyrelease.append ((self.getBind("up"), lambda : self.setYDir(0)))
+
+        self.keypress.append ((self.getBind("slower"), lambda : self.setSpeed(self.getBind("speed_slower"))))
+        self.keypress.append ((self.getBind("slow"), lambda : self.setSpeed(self.getBind("speed_slow"))))
+        self.keypress.append ((self.getBind("normal"), lambda : self.setSpeed(self.getBind("speed_normal"))))
+        self.keypress.append ((self.getBind("fast"), lambda : self.setSpeed(self.getBind("speed_fast"))))
+        self.keypress.append ((self.getBind("fastest"), lambda : self.setSpeed(self.getBind("speed_fastest"))))
+
+        self.keypress.append ((self.getBind("reset"), lambda : self.reset()))
+
+        self.keypress.append ((self.getBind("kill"), self.kill))
 
 app = App()
 app.run()
