@@ -2,6 +2,8 @@
 
 > Throughout the ages, society has aimed to eliminate the mouse from daily computing one step at a time, first there was vim for text editing, then there was vimium for browsers, and now, the final solution to removing that mouse once and for all: introducing MouseRemoval!
 
+linux version now available with the pynput branch! more information is provided on the branch's readme
+
 ## Dependencies
 Ensure you have the following to run MouseRemoval
 - Python 
@@ -34,7 +36,6 @@ down : down
 
 ### Missing features
 - Custom speed management
-- Key suppression on non windows operating systems (a linux fix is currently being worked on)
 
 ## Disclaimer
 This is a program that literally manipulates your mouse and blocks keyboard input. MouseRemoval isn't designed to be malicious but sometimes shit can hit the fan when you're not looking. I take no responsibility for any damages caused by this program.
