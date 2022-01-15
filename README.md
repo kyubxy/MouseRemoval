@@ -19,5 +19,8 @@ use <kbd>b</kbd> to terminate the program
 ### Configuration
 Unlike its windows counterpart, pynput mouse removal does not use a config file. Your best bet is to edit the source directly. All keybinds are stored in the `DEFAULT_BINDS` dictionary.
 
+### Limitations
+- enabling mouse mode consumes *all* keyboard input. Things like alt dragging are now impossible
+
 ## Disclaimer
 This is a program that literally manipulates your mouse and blocks keyboard input. MouseRemoval isn't designed to be malicious but sometimes shit can hit the fan when you're not looking. I take no responsibility for any damages caused by this program.
