@@ -2,7 +2,7 @@
 
 > Throughout the ages, society has aimed to eliminate the mouse from daily computing one step at a time, first there was vim for text editing, then there was vimium for browsers, and now, the final solution to removing that mouse once and for all: introducing MouseRemoval!
 
-linux version now available with the pynput branch! more information is provided on the branch's readme
+linux version now available with the [pynput branch](https://github.com/peipacut/MouseRemoval/tree/pynput)! more information is provided on the branch's readme
 
 ## Dependencies
 Ensure you have the following to run MouseRemoval
