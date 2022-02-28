@@ -23,6 +23,7 @@ Unlike its windows counterpart, pynput mouse removal does not use a config file.
 
 ### Limitations
 - enabling mouse mode consumes *all* keyboard input. Things like alt dragging are now impossible
+- pynput's input grabbing tends not to play well with other applications that grab input (like rofi or dmenu). A fix is currently being looked into.
 
 ## Disclaimer
 This is a program that literally manipulates your mouse and blocks keyboard input. MouseRemoval isn't designed to be malicious but sometimes shit can hit the fan when you're not looking. I take no responsibility for any damages caused by this program.
